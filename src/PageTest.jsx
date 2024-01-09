@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios"
+import axios from "axios"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import moment from "moment"
@@ -11,12 +11,25 @@ export const PageTest = () => {
     const [acessToken, setAcessToken] = useState(null)
 
     useEffect(() => {
+        const checkExpires = () => {
+            if(payloadAccessToken){
+                const dateExpiresAcessToken = moment(payloadAccessToken?.exp ?? 0 * 1000)
+                const now = moment()
+        
+                console.log("dateExpiresAcessToken", dateExpiresAcessToken)
+                console.log("date", dateExpiresAcessToken.diff(now, 'minutes'))
+                
+                return dateExpiresAcessToken.diff(now, 'minutes') <= 0
+    
+            }else return false
+        }
+
         if(!tokenStorage) authenticate()
 
         else{
             if(checkExpires()) tokenRenewal()
         }
-    }, [tokenStorage])
+    }, [tokenStorage, acessToken, payloadAccessToken])
 
     const authenticate = async () => {
         try {
@@ -36,19 +49,6 @@ export const PageTest = () => {
         } catch (error) {
             setMessage("Algo errado ocorreu")
         }
-    }
-
-    const checkExpires = () => {
-        if(payloadAccessToken){
-            const dateExpiresAcessToken = moment(payloadAccessToken?.exp ?? 0 * 1000)
-            const now = moment()
-    
-            console.log("dateExpiresAcessToken", dateExpiresAcessToken)
-            console.log("date", dateExpiresAcessToken.diff(now, 'minutes'))
-            
-            return dateExpiresAcessToken.diff(now, 'minutes') <= 0
-
-        }else return false
     }
 
     const tokenRenewal = async () => {
